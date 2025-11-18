@@ -1,0 +1,31 @@
+<header>
+	<nav>
+		<h2>Le bon clone</h2>
+
+		{# Tout ce qui concerne (if, for) = syntaxe {% %} #}
+		{% if app.user %}
+			<div id="nav-buttons">
+				<a href="{{path('app_add_ad')}}">
+					<button>Post your Ad</button>
+				</a>
+				<a href="{{path('app_ad', {id : app.user.id})}}">
+					<button>Check my Ads</button>
+				</a>
+				<a href="{{path('app_logout')}}">Log out</a>
+			</div>
+		{% else %}
+			<a href="{{path('app_register')}}">Sign up</a>
+			<a href="{{path('app_login')}}">Log in</a>
+		{% endif %}
+	</nav>
+</header>
+
+<div class="flash-message">
+	{% for label, messages in app.flashes %}
+		{% for message in messages %}
+			<div class="alert alert-{{ label }} alert-messages">
+				{{ message }}
+			</div>
+		{% endfor %}
+	{% endfor %}
+</div>

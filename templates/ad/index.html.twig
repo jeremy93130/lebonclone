@@ -1,0 +1,10 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello AdController!
+{% endblock %}
+
+{% block body %}
+	{% for product in products %}
+		<h2 class=>{{product.name}}</h2>
+	{% endfor %}
+{% endblock %}

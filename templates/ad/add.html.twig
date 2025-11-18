@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Formulaire
+{% endblock %}
+
+{% block body %}
+	{# Façon numéro 1 : La plus simple (affiche tout le formulaire sans chichi) #}
+	{# {{form_start(form)}}
+			{{form_widget(form)}}
+			{{form_end(form)}} #}
+
+	{# Façon numéro 2 : La plus longue (permet d'afficher chaque champ séparemment)#}
+	{# {{form_start(form)}}
+				<div>
+				{{form_label(form.name)}}
+				{{form_widget(form.name)}}
+			{{form_errors(form.name)}}
+			</div>
+				<div>
+				{{form_label(form.description)}}
+				{{form_widget(form.description)}}
+			{{form_errors(form.description)}}
+			</div>
+		{{form_end(form)}} #}
+
+
+	{# 3ème façon (comme la 2nd mais en plus court) #}
+
+	{{form_start(form)}}
+	{{form_row(form.name)}}
+	{{form_row(form.description)}}
+    {{form_end(form)}}
+
+{% endblock %}

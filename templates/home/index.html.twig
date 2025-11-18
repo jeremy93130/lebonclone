@@ -4,5 +4,28 @@
 {% endblock %}
 
 {% block body %}
-	<h2>Bienvenue sur mon {{controller_name}}</h2>
+	{{dump(lastProducts)}}
+	<div class="container container1">
+		{% for pr in lastProducts %}
+
+			<div class="carta">
+				<a href="{{path('app_ad', {id : pr.user.id})}}">
+					<div class="div-img">
+						<h2>{{pr.name}}</h2>
+						<img src="{{asset("assets/uploads/" ~ pr.mainImage)}}" alt="{{pr.description}}">
+					</div>
+				</a>
+				<div class="text-product">
+					<p>{{pr.description | u.truncate(30, '...')}}</p>
+					<p>
+						Price :
+						{{pr.price}}$</p>
+					<p>Posted by :
+						<a href="{{path('app_ad', {id: pr.user.id})}}" id="postedBy">{{pr.user.email|split('@')[0]|capitalize}}</a>
+					</p>
+				</div>
+			</div>
+
+		{% endfor %}
+	</div>
 {% endblock %}

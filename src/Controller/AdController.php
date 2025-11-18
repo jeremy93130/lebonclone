@@ -18,13 +18,18 @@ final class AdController extends AbstractController
     #[Route('/ad/{id}', name: 'app_ad')]
     public function index(int $id, ProductsRepository $productsRepository): Response
     {
+        // Vérification que l'utilisateur est bien connecté
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
+        // On récupère tous les produits dont le propriétaire est égal à l'id de l'url
         $products = $productsRepository->findBy(['user' => $id]);
+        // On récupère l'objet utilisateur.
+        $user = $products[0]->getUser();
 
         return $this->render('ad/index.html.twig', [
             'controller_name' => 'AdController',
-            'products' => $products
+            'products' => $products,
+            'user' => $user
         ]);
     }
 

@@ -6,9 +6,11 @@ use App\Entity\Products;
 use App\Entity\User;
 use App\Form\AddadType;
 use App\Repository\ProductsRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -16,15 +18,16 @@ use Symfony\Component\Routing\Attribute\Route;
 final class AdController extends AbstractController
 {
     #[Route('/ad/{id}', name: 'app_ad')]
-    public function index(int $id, ProductsRepository $productsRepository): Response
+    public function index(int $id, ProductsRepository $productsRepository, UserRepository $userRepository): Response
     {
         // Vérification que l'utilisateur est bien connecté
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
         // On récupère tous les produits dont le propriétaire est égal à l'id de l'url
         $products = $productsRepository->findBy(['user' => $id]);
-        // On récupère l'objet utilisateur.
-        $user = $products[0]->getUser();
+
+        // $user = Si products a un tableau rempli, $user prend la valeur de l'utilisateur à qui appartient le produit (via l'objet $products) : sinon c'est que l'utilisateur n'a aucun produit donc on va récupérer l'utilisateur directement dans la table User
+        $user = $products ? $products[0]->getUser() : $userRepository->find($id);
 
         return $this->render('ad/index.html.twig', [
             'controller_name' => 'AdController',
@@ -95,5 +98,22 @@ final class AdController extends AbstractController
         }
 
         return $this->render('ad/add.html.twig', ['form' => $form->createView()]);
+    }
+
+
+    #[Route('/delete-ad/{id}', name: 'app_delete_ad')]
+    public function deleteAd(int $id, EntityManagerInterface $entityManagerInterface, ProductsRepository $productsRepository)
+    {
+
+        $product = $productsRepository->find($id);
+
+        if(!$product){
+            return new JsonResponse(['id' => "Product not found"]);
+        }
+
+        $entityManagerInterface->remove($product);
+        $entityManagerInterface->flush();
+
+        return new JsonResponse(['success' => 'ok']);
     }
 }

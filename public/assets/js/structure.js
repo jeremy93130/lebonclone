@@ -1,0 +1,137 @@
+// On va retirer les messages informatifs au bout de 5 secondes
+
+setTimeout(() => {
+    document.querySelectorAll('.alert-messages').forEach(element => element.remove());
+}, 5000);
+
+
+// Préparation requête ajax 
+let buttons = document.querySelectorAll('.addToCart');
+let span = document.createElement('span');
+let msgTimeout = null;
+
+async function addToCart(id) {
+
+    try {
+        span.textContent = '';
+
+        const res = await fetch('/addCart/' + id, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ qty: 1 })
+        });
+
+        if (!res.ok) {
+            throw new Error("Something went wrong");
+        }
+
+        const datas = await res.json();
+
+        if (datas.length) {
+            span.textContent = datas.length;
+            span.style.color = "red";
+        }
+
+        if (datas.nb) {
+            document.querySelector('#nbProd').textContent = datas.nb;
+            document.querySelector('#nbProd').style.display = 'inline';
+            span.textContent = "Your product has been added";
+            span.style.color = "green";
+        }
+
+        buttons.forEach(button => {
+            if (button.id === id) {
+                button.after(span);
+            }
+        })
+
+        if (msgTimeout) {
+            clearTimeout(msgTimeout);
+        }
+
+        msgTimeout = setTimeout(() => {
+            span.remove();
+        }, 4000)
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+buttons.forEach(button => {
+    button.addEventListener('click', function () {
+        addToCart(button.id);
+    })
+})
+
+
+let buttonsSupp = document.querySelectorAll('.delete-button');
+
+async function deleteProductCart(id) {
+    try {
+        const res = await fetch('/delete/' + id);
+
+        if (!res.ok) {
+            throw new Error("Oops, something went wrong");
+        }
+        const data = await res.json();
+
+        buttonsSupp.forEach(button => {
+            if (button.getAttribute('data-id') === id) {
+
+                if (data.nb === 0) {
+                    document.querySelector('table').remove();
+                    document.querySelector('#nbProd').style.display = 'none';
+
+                    let empty = document.createElement('h2');
+                    empty.textContent = "Your cart is empty !";
+
+                    document.querySelector('.container').append(empty);
+                    return;
+                }
+                document.querySelector('#total-cart').textContent = data.total;
+                document.querySelector('#nbProd').textContent = data.nb;
+                button.parentElement.parentElement.remove();
+            }
+        })
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+
+buttonsSupp.forEach(button => {
+    button.addEventListener('click', function () {
+        deleteProductCart(button.getAttribute('data-id'));
+    })
+});
+
+
+
+// Supprimer Annonce
+
+let delButton = document.querySelectorAll(".delete-ad");
+
+async function deleteAd(id) {
+    try {
+
+        const res = await fetch('/delete-ad/' + id)
+
+        if (!res.ok) {
+            throw new Error("Oops, something went wrong");
+        }
+
+        const data = await res.json();
+
+        console.log(data.success);
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+delButton.forEach(button => {
+    button.addEventListener('click', function () {
+        deleteAd(button.getAttribute('data-id'));
+    })
+})

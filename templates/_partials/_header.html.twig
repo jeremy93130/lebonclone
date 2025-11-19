@@ -4,6 +4,7 @@
 
 		{# Tout ce qui concerne (if, for) = syntaxe {% %} #}
 		<div id="nav-buttons">
+			<a href="{{path('app_home')}}">HomePage</a>
 			{% if app.user %}
 				<a href="{{path('app_add_ad')}}">
 					<button>Post your Ad</button>
@@ -12,6 +13,10 @@
 					<button>Check my Ads</button>
 				</a>
 				<a href="{{path('app_logout')}}" id="logout">Log out</a>
+				<a href="{{path('app_cart')}}" id="a_relative">
+					<i class="fa-solid fa-2xl fa-cart-shopping"></i>
+					<span id="nbProd" style="display: {{app.session.get('cart') ? 'inline' : 'none'}}">{{app.session.get('cart')|length ?: ''}}</span>
+				</a>
 			{% else %}
 				<a href="{{path('app_register')}}">Sign up</a>
 				<a href="{{path('app_login')}}">Log in</a>

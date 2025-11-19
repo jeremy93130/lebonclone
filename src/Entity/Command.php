@@ -3,6 +3,9 @@
 namespace App\Entity;
 
 use App\Repository\CommandRepository;
+use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CommandRepository::class)]
@@ -14,7 +17,7 @@ class Command
     private ?int $id = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    private ?DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(length: 255)]
     private ?string $adress = null;
@@ -28,17 +31,29 @@ class Command
     #[ORM\Column]
     private ?float $totalPrice = null;
 
+    /**
+     * @var Collection<int, ProductCommand>
+     */
+    #[ORM\OneToMany(targetEntity: ProductCommand::class, mappedBy: 'command')]
+    private Collection $productCommand;
+
+    public function __construct()
+    {
+        $this->createdAt = new DateTimeImmutable('now',new \DateTimeZone('Europe/Paris'));
+        $this->productCommand = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): ?DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    public function setCreatedAt(DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
 
@@ -89,6 +104,36 @@ class Command
     public function setTotalPrice(float $totalPrice): static
     {
         $this->totalPrice = $totalPrice;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ProductCommand>
+     */
+    public function getProductCommand(): Collection
+    {
+        return $this->productCommand;
+    }
+
+    public function addProductCommand(ProductCommand $productCommand): static
+    {
+        if (!$this->productCommand->contains($productCommand)) {
+            $this->productCommand->add($productCommand);
+            $productCommand->setCommand($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProductCommand(ProductCommand $productCommand): static
+    {
+        if ($this->productCommand->removeElement($productCommand)) {
+            // set the owning side to null (unless already changed)
+            if ($productCommand->getCommand() === $this) {
+                $productCommand->setCommand(null);
+            }
+        }
 
         return $this;
     }

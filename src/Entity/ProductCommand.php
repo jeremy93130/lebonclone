@@ -20,6 +20,9 @@ class ProductCommand
     #[ORM\ManyToOne(inversedBy: 'productCommand')]
     private ?User $user = null;
 
+    #[ORM\ManyToOne(inversedBy: 'productCommand')]
+    private ?Command $command = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -45,6 +48,18 @@ class ProductCommand
     public function setUser(?User $user): static
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getCommand(): ?Command
+    {
+        return $this->command;
+    }
+
+    public function setCommand(?Command $command): static
+    {
+        $this->command = $command;
 
         return $this;
     }

@@ -1,20 +1,51 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello CartController!{% endblock %}
+{% block title %}Hello CartController!
+{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
-
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>C:/Users/Jeremy/Desktop/lebonclone/src/Controller/CartController.php</code></li>
-        <li>Your template at <code>C:/Users/Jeremy/Desktop/lebonclone/templates/cart/index.html.twig</code></li>
-    </ul>
-</div>
-{% endblock %}
+	<div class="container container1">
+		{% if products is not empty %}
+			<table border="1">
+				<tr>
+					<th>Product img</th>
+					<th>Product name</th>
+					<th>Price</th>
+					<th>Product description</th>
+					<th>Action</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for pr in products %}
+					<tr>
+						<td><img src="{{asset('assets/uploads/'~ pr.mainImage)}}" alt="{{pr.description}}"></td>
+						<td>{{pr.name}}</td>
+						<td>{{pr.price | number_format(2,',',' ')}}$</td>
+						<td>{{pr.description}}</td>
+						<td>
+							<button class="delete-button" data-id={{pr.id}}>Delete</button>
+						</td>
+					</tr>
+				{% endfor %}
+				<tr>
+					<td></td>
+					<td colspan="2">Total price :
+						<span id="total-cart">{{total}}</span>
+						$
+					</td>
+					<td></td>
+					<td>
+						<a href="{{path('app_delete_cart')}}">
+							<button>Empty your cart</button>
+						</a>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<a href="{{path('app_command')}}">
+			<button>Order Now</button>
+		</a>
+	{% else %}
+		<h2>Your cart is empty !</h2>
+	{% endif %}
+</div>{% endblock %}

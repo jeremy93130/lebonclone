@@ -1,0 +1,10 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello CommandController!
+{% endblock %}
+
+{% block body %}
+	<meta http-equiv="refresh" content="{{delay}};url={{url}}">
+	<h2>Thank you for your Order
+		{{app.user.email|split('@')[0]}}</h2>
+{% endblock %}

@@ -5,9 +5,12 @@
 
 {% block body %}
 	<h2>
-		Page Profil de
+		Profil page of
 		{{user.email|split('@')[0]}}</h2>
 	<div class="container container1">
+		{% if products is empty %}
+			<h2>This user doesn't have any Ad yet</h2>
+		{% endif %}
 		{% for pr in products %}
 			<div class="carta">
 				<div class="div-img">
@@ -21,7 +24,8 @@
 						{{pr.price}}$</p>
 				</div>
 				{% if app.user.id is same as(pr.user.id) %}
-					<p>Coucou</p>
+					<button class="modify-ad" data-id="{{pr.id}}">Modify your ad</button>
+					<button class='delete-ad' data-id="{{pr.id}}">Delete your ad</button>
 				{% else %}
 					<button id="{{pr.id}}" class="addToCart">Add To Cart</button>
 				{% endif %}

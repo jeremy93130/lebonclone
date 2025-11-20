@@ -44,12 +44,20 @@ class ProductsRepository extends ServiceEntityRepository
 
     public function lastFiveProducts(int $limit = 5): array
     {
+        // Requête personnalisée pour récupérer les 5 derniers produits
+        // 'p' représente la table Products
         return $this->createQueryBuilder('p')
+            // Condition WHERE p.sold = paramètre de requête (voir requêtes préparées)
             ->andWhere('p.sold = :sold')
+            // setParameter (c'est comme bindParam ou bindValue)
             ->setParameter('sold', false)
+            // On trie par ID décroissant (du plus grand au plus petit)
             ->orderBy('p.id', 'DESC')
+            // On limite les résultats à 5
             ->setMaxResults($limit)
+            // On lance la requête
             ->getQuery()
+            // On fetch les données
             ->getResult();
     }
 }

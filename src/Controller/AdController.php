@@ -116,61 +116,90 @@ final class AdController extends AbstractController
         if (!$product) {
             return new JsonResponse(['id' => "Product not found"]);
         }
-        // Si le produit qu'on essaye de supprimer est présent dans ProductCommande (ça veut dire qu'il a déjà été vendu, du coup on le supprime "visuellement"), sinon c'est qu'il n'a jamais été vendu donc aucun intêret de le garder dans la BDD (on le supprime totalement)
+
         // dd($product->getProductCommand()->toArray());
 
+        // $verifProduct = est-ce que l'id du produit se trouve dans la table ProductCommand ? si oui on prend l'id dans cette table, sinon l'id est égal à 0 (0 n'existe pas donc ça veut dire non)
         $verifProduct = isset($product->getProductCommand()->toArray()[0]) ? $product->getProductCommand()->toArray()[0]->getProduct()->getId() : 0;
 
+        // Si le produit qu'on essaye de supprimer est présent dans ProductCommande (ça veut dire qu'il a déjà été vendu, du coup on le supprime "visuellement"), sinon c'est qu'il n'a jamais été vendu donc aucun intêret de le garder dans la BDD (on le supprime totalement)
         if ($verifProduct === $id) {
             $product->setShown(false);
             $entityManagerInterface->persist($product);
             $entityManagerInterface->flush();
         } else {
+            // Si oldImage n'est pas null et que l'image existe bien dans le dossier uploads
+            if ($product->getMainImage() && file_exists($this->getParameter('uploads_directory'))) {
+                // On récupère le chemin de uploads
+                $path = $this->getParameter('uploads_directory');
+                // On supprime le fichier qui se trouve à ce chemin 
+                // lebonclone/public/assets/uploads/ancienneimage.png
+                unlink("$path/" . $product->getMainImage());
+            }
             $entityManagerInterface->remove($product);
             $entityManagerInterface->flush();
         }
 
+        // C'est une requête fetch() donc on envoie la réponse à Javascript
         return new JsonResponse(['success' => 'ok']);
     }
 
     #[Route('/modify/{id}', name: 'app_modify')]
     public function modifyAd(int $id, ProductsRepository $productsRepository, EntityManagerInterface $entityManagerInterface, Request $request)
     {
+        // Je récupère mon produit dans la BDD grâce au repository
         $product = $productsRepository->find($id);
 
+        // Je stock le nom de l'image du produit actuel
         $oldImage = $product->getMainImage();
 
+        // Je créér le formulaire (le type est ModifAdType::class ("App\Form\ModifAdType"), l'entité à remplir)
         $form = $this->createForm(ModifAdType::class, $product);
+        // On vérifie si l'objet $request est rempli (s'il est rempli c'est qu'une requête a été lancée du formulaire)
         $form->handleRequest($request);
 
+        // Si mon formulaire a été soumis (on vérifie avec $request) et est valide (les constraints dans la config du formulaire)
         if ($form->isSubmitted() && $form->isValid()) {
             // On la récupère des données du formulaire
+
+            // On récupère les données du champ mainImage (si elles ont été modifiées sinon il sera à null)
             $imageFile = $form->get('mainImage')->getData();
 
+            // Si $imageFile n'est pas null ça veut forcement dire qu'on a rempli le champ pour changer l'image 
             if ($imageFile) {
                 // Nom unique + l'extension d'origine
                 $newFileName = uniqid() . '.' . $imageFile->guessExtension();
 
                 try {
                     // Déplacer le fichier vers public/uploads
+                    // Il va faire lebonclone/public/assets/uploads/68agt22.jpg
                     $imageFile->move(
                         $this->getParameter('uploads_directory'),
                         $newFileName
                     );
 
+                    // Si oldImage n'est pas null et que l'image existe bien dans le dossier uploads
                     if ($oldImage && file_exists($this->getParameter('uploads_directory'))) {
+                        // On récupère le chemin de uploads
                         $path = $this->getParameter('uploads_directory');
+                        // On supprime le fichier qui se trouve à ce chemin 
+                        // lebonclone/public/assets/uploads/ancienneimage.png
                         unlink("$path/$oldImage");
-                    }   
+                    }
+                    // On lie le nouveau nom de la nouvelle image à l'objet Products pour qu'il sache que cette image lui appartient
                     $product->setMainImage($newFileName);
                 } catch (FileException $e) {
                     echo $e->getMessage();
                 }
             }
+            // On enregistre la nouvelle "version" de l'objet
             $entityManagerInterface->persist($product);
+            // On envoie la requête à la BDD pour la mettre à jour
             $entityManagerInterface->flush();
 
+            // On créer un message flash 
             $this->addFlash('success', "Your ad has been modified");
+            // On utilise la méthode PRG (Post-Redirect-Get) et on redirige sur la MEME page (mais la requête POST n'existe plus)
             return $this->redirectToRoute("app_modify", ['id' => $id]);
         }
         return $this->render("ad/modify.html.twig", [

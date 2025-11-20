@@ -25,35 +25,46 @@ final class CommandController extends AbstractController
             $products[] = $productsRepository->find($key);
         }
 
+
+        // On créer une variable total avec une valeur à 0 pour calculer le total après
         $total = 0;
 
-        foreach ($products as $pr) {
-            $total += $pr->getPrice();
-            $pr->setSold(true);
-
-            $entityManagerInterface->persist($pr);
-        }
-
+        // On créer un objet command qu'on rempli avec les informations dont on dispose
         $command = new Command();
-        $command->setAdress("13 rue de l'amour")->setZipCode(85100)->setCity('Les sables-d\'olonne')->setTotalPrice($total);
+        $command->setAdress("13 rue de l'amour")->setZipCode(85100)->setCity('Les sables-d\'olonne');
 
+        // On boucle sur chaque produit
         foreach ($products as $pr) {
+            // On créer l'objet ProductCommand (pour chaque produit)
             $productCommand = new ProductCommand();
 
+            // On le rempli avec le produit concerné, l'utilisateur
             $productCommand->setProduct($pr);
             $productCommand->setUser($this->getUser());
 
+            // On relie l'objet ProductCommand à la commande qu'on vient de créer (ligne 33)
             $command->addProductCommand($productCommand);
 
+            // On enregistre à chaque tour de boucle l'objet productCommand (il y'en aura autant qu'il y'a de produits)
             $entityManagerInterface->persist($productCommand);
+
+            // On calcule le total (total = total + le prix de chaque produit)
+            $total += $pr->getPrice();
+            // On spécifie que le produit a été vendu (à true)
+            $pr->setSold(true);
+            // On enregistre la modification de l'objet Produit (pour chaque produit vu qu'on est dans une boucle)
+            $entityManagerInterface->persist($pr);
         }
-
+        // On donne le total à l'objet command
+        $command->setTotalPrice($total);
+        // On enregistre l'objet commande
         $entityManagerInterface->persist($command);
-
+        // On envoie toutes les modifications (tous les persists)
         $entityManagerInterface->flush();
 
+        // On vide le panier
         $session->remove('cart');
-
+        // On redirige vers la page qui confirme que la commande a bien été traitée
         return $this->redirectToRoute('app_confirm');
     }
 

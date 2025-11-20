@@ -15,6 +15,9 @@
 			<div class="carta">
 				<div class="div-img">
 					<h2>{{pr.name}}</h2>
+					{% if pr.sold %}
+						<img class="sold" src="{{asset('assets/uploads/static_images/sold.png')}}" alt="Sold Product">
+					{% endif %}
 					<img src="{{asset("assets/uploads/" ~ pr.mainImage)}}" alt="{{pr.description}}">
 				</div>
 				<div class="text-product">
@@ -24,7 +27,11 @@
 						{{pr.price}}$</p>
 				</div>
 				{% if app.user.id is same as(pr.user.id) %}
-					<button class="modify-ad" data-id="{{pr.id}}">Modify your ad</button>
+					{% if pr.sold is not true %}
+						<a href="{{path('app_modify', {id : pr.id})}}">
+							<button class="modify-ad">Modify your ad</button>
+						</a>
+					{% endif %}
 					<button class='delete-ad' data-id="{{pr.id}}">Delete your ad</button>
 				{% else %}
 					<button id="{{pr.id}}" class="addToCart">Add To Cart</button>

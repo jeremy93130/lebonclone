@@ -29,6 +29,9 @@ final class CommandController extends AbstractController
 
         foreach ($products as $pr) {
             $total += $pr->getPrice();
+            $pr->setSold(true);
+
+            $entityManagerInterface->persist($pr);
         }
 
         $command = new Command();

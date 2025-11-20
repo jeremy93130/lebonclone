@@ -14,7 +14,7 @@ class ProductCommand
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'productcommand')]
-    #[ORM\JoinColumn(nullable: true)]
+    #[ORM\JoinColumn(nullable: true, name: 'product_id', referencedColumnName: 'id')]
     private ?Products $product = null;
 
     #[ORM\ManyToOne(inversedBy: 'productCommand')]

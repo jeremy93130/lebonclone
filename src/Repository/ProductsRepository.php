@@ -45,6 +45,8 @@ class ProductsRepository extends ServiceEntityRepository
     public function lastFiveProducts(int $limit = 5): array
     {
         return $this->createQueryBuilder('p')
+            ->andWhere('p.sold = :sold')
+            ->setParameter('sold', false)
             ->orderBy('p.id', 'DESC')
             ->setMaxResults($limit)
             ->getQuery()

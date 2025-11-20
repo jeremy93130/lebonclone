@@ -124,7 +124,15 @@ async function deleteAd(id) {
 
         const data = await res.json();
 
-        console.log(data.success);
+        if (data.success) {
+            const carta = document.querySelectorAll('.carta');
+
+            carta.forEach(cart => {
+                if (cart.querySelector('.delete-ad').getAttribute('data-id') === id) {
+                    cart.remove();
+                }
+            })
+        }
     } catch (error) {
         console.error(error);
     }

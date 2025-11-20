@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Products;
 use App\Entity\User;
 use App\Form\AddadType;
+use App\Form\ModifAdType;
 use App\Repository\ProductsRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -24,7 +25,12 @@ final class AdController extends AbstractController
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
         // On récupère tous les produits dont le propriétaire est égal à l'id de l'url
-        $products = $productsRepository->findBy(['user' => $id]);
+        /**
+         * @var User $user
+         */
+        $user = $this->getUser();
+
+        $products = $id === $user->getId() ? $productsRepository->findBy(['user' => $id, 'shown' => true]) : $productsRepository->findBy(["user" => $id, 'sold' => false]);
 
         // $user = Si products a un tableau rempli, $user prend la valeur de l'utilisateur à qui appartient le produit (via l'objet $products) : sinon c'est que l'utilisateur n'a aucun produit donc on va récupérer l'utilisateur directement dans la table User
         $user = $products ? $products[0]->getUser() : $userRepository->find($id);
@@ -107,13 +113,68 @@ final class AdController extends AbstractController
 
         $product = $productsRepository->find($id);
 
-        if(!$product){
+        if (!$product) {
             return new JsonResponse(['id' => "Product not found"]);
         }
+        // Si le produit qu'on essaye de supprimer est présent dans ProductCommande (ça veut dire qu'il a déjà été vendu, du coup on le supprime "visuellement"), sinon c'est qu'il n'a jamais été vendu donc aucun intêret de le garder dans la BDD (on le supprime totalement)
+        // dd($product->getProductCommand()->toArray());
 
-        $entityManagerInterface->remove($product);
-        $entityManagerInterface->flush();
+        $verifProduct = isset($product->getProductCommand()->toArray()[0]) ? $product->getProductCommand()->toArray()[0]->getProduct()->getId() : 0;
+
+        if ($verifProduct === $id) {
+            $product->setShown(false);
+            $entityManagerInterface->persist($product);
+            $entityManagerInterface->flush();
+        } else {
+            $entityManagerInterface->remove($product);
+            $entityManagerInterface->flush();
+        }
 
         return new JsonResponse(['success' => 'ok']);
+    }
+
+    #[Route('/modify/{id}', name: 'app_modify')]
+    public function modifyAd(int $id, ProductsRepository $productsRepository, EntityManagerInterface $entityManagerInterface, Request $request)
+    {
+        $product = $productsRepository->find($id);
+
+        $oldImage = $product->getMainImage();
+
+        $form = $this->createForm(ModifAdType::class, $product);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // On la récupère des données du formulaire
+            $imageFile = $form->get('mainImage')->getData();
+
+            if ($imageFile) {
+                // Nom unique + l'extension d'origine
+                $newFileName = uniqid() . '.' . $imageFile->guessExtension();
+
+                try {
+                    // Déplacer le fichier vers public/uploads
+                    $imageFile->move(
+                        $this->getParameter('uploads_directory'),
+                        $newFileName
+                    );
+
+                    if ($oldImage && file_exists($this->getParameter('uploads_directory'))) {
+                        $path = $this->getParameter('uploads_directory');
+                        unlink("$path/$oldImage");
+                    }   
+                    $product->setMainImage($newFileName);
+                } catch (FileException $e) {
+                    echo $e->getMessage();
+                }
+            }
+            $entityManagerInterface->persist($product);
+            $entityManagerInterface->flush();
+
+            $this->addFlash('success', "Your ad has been modified");
+            return $this->redirectToRoute("app_modify", ['id' => $id]);
+        }
+        return $this->render("ad/modify.html.twig", [
+            'form' => $form
+        ]);
     }
 }

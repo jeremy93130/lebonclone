@@ -112,6 +112,16 @@ header h2 {
         border-top-left-radius: 10px;
         border-top-right-radius: 10px;
     }
+
+    .sold {
+        position: absolute;
+       rotate: -30deg;
+       box-shadow: 1px 1px 20px green;
+       border-radius: 100%;
+       background-color: rgba(0, 128, 0, 0.319);
+        width: 80px;
+        height: 80px;
+    }
 }
 
 .container1 {

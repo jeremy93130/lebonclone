@@ -41,6 +41,12 @@ class Products
     #[ORM\JoinColumn(nullable: true)]
     private ?User $user = null;
 
+    #[ORM\Column]
+    private ?bool $sold = false;
+
+    #[ORM\Column]
+    private ?bool $shown = true;
+
     public function __construct()
     {
         $this->productcommand = new ArrayCollection();
@@ -149,6 +155,30 @@ class Products
     public function setUser(?User $user): static
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function isSold(): ?bool
+    {
+        return $this->sold;
+    }
+
+    public function setSold(bool $sold): static
+    {
+        $this->sold = $sold;
+
+        return $this;
+    }
+
+    public function isShown(): ?bool
+    {
+        return $this->shown;
+    }
+
+    public function setShown(bool $shown): static
+    {
+        $this->shown = $shown;
 
         return $this;
     }

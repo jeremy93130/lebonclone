@@ -55,6 +55,7 @@ header h2 {
 /* Header */
 #a_relative {
     position: relative;
+
     span {
         position: absolute;
         margin-top: 10px;
@@ -66,6 +67,11 @@ header h2 {
         border-radius: 50%;
         text-align: center;
     }
+}
+
+#search {
+    border-radius: 10px;
+    background-color: #D9D3C7;
 }
 
 /* Fin */
@@ -94,6 +100,11 @@ header h2 {
     box-shadow: 1px 1px 10px white;
 }
 
+#last {
+    display: flex;
+    width: 100%;
+}
+
 .div-img {
     position: relative;
     height: 20rem;
@@ -115,10 +126,10 @@ header h2 {
 
     .sold {
         position: absolute;
-       rotate: -30deg;
-       box-shadow: 1px 1px 20px green;
-       border-radius: 100%;
-       background-color: rgba(0, 128, 0, 0.319);
+        rotate: -30deg;
+        box-shadow: 1px 1px 20px green;
+        border-radius: 100%;
+        background-color: rgba(0, 128, 0, 0.319);
         width: 80px;
         height: 80px;
     }
@@ -179,7 +190,9 @@ table img {
     width: 150px;
 }
 
-tr,td,th {
+tr,
+td,
+th {
     border: 1px solid;
     text-align: center;
 }

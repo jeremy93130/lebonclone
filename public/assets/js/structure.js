@@ -143,3 +143,80 @@ delButton.forEach(button => {
         deleteAd(button.getAttribute('data-id'));
     })
 })
+
+
+
+
+// Search ad 
+// =========== Etats pour debounce + annulation ==========
+
+let timer = null; // Sert à attendre avant de lancer le fetch
+let controller = null; // Sert à arrêter la requête en cours
+
+// On récupère l'input
+let search = document.querySelector("#search");
+let list = document.createElement('div');
+
+
+// Petit utilitaire d'affichage 
+
+function setMsg(text, cls = '') {
+    msg.classList = "info" + cls;
+    msg.textContent = text;
+}
+
+function clearList() {
+    list.innerHTML = '';
+}
+
+async function searchAd(value) {
+
+    if (controller) {
+        controller.abort();
+    }
+
+    controller = new AbortController();
+    try {
+        console.log(value);
+        const res = await fetch('/search', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ value }),
+            signal: controller.signal
+        });
+
+        if (!res.ok) {
+            throw new Error("Something went wrong");
+        }
+
+        const datas = await res.json();
+
+        console.log(datas);
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+search.addEventListener('input', function () {
+    clearTimeout(timer);
+    const q = this.value.trim();
+    if (q.length === 0) {
+        if (controller) {
+            controller.abort();
+        }
+        setMsg("");
+        clearList();
+        return;
+    }
+
+    if (q.length < MIN) {
+        // On écrit un message qui dit qu'il nous manque tant de caractères pour lancer la recherche
+        setMsg(`You must write ${MIN - q.length} letters to search`);
+        clearList();
+        return;
+    }
+
+    searchAd(search.value);
+});

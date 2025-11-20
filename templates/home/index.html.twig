@@ -5,26 +5,29 @@
 
 {% block body %}
 	<div class="container container1">
-		{% for pr in lastProducts %}
+		<h2>Last Posted Ads</h2>
+		<div id="last">
+			{% for pr in lastProducts %}
 
-			<div class="carta">
-				<a href="{{path('app_ad', {id : pr.user.id})}}">
-					<div class="div-img">
-						<h2>{{pr.name}}</h2>
-						<img src="{{asset("assets/uploads/" ~ pr.mainImage)}}" alt="{{pr.description}}">
+				<div class="carta">
+					<a href="{{path('app_ad', {id : pr.user.id})}}">
+						<div class="div-img">
+							<h2>{{pr.name}}</h2>
+							<img src="{{asset("assets/uploads/" ~ pr.mainImage)}}" alt="{{pr.description}}">
+						</div>
+					</a>
+					<div class="text-product">
+						<p>{{pr.description | u.truncate(30, '...')}}</p>
+						<p>
+							Price :
+							{{pr.price}}$</p>
+						<p>Posted by :
+							<a href="{{path('app_ad', {id: pr.user.id})}}" id="postedBy">{{pr.user.email|split('@')[0]|capitalize}}</a>
+						</p>
 					</div>
-				</a>
-				<div class="text-product">
-					<p>{{pr.description | u.truncate(30, '...')}}</p>
-					<p>
-						Price :
-						{{pr.price}}$</p>
-					<p>Posted by :
-						<a href="{{path('app_ad', {id: pr.user.id})}}" id="postedBy">{{pr.user.email|split('@')[0]|capitalize}}</a>
-					</p>
 				</div>
-			</div>
 
-		{% endfor %}
+			{% endfor %}
+		</div>
 	</div>
 {% endblock %}

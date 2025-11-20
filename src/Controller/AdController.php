@@ -206,4 +206,11 @@ final class AdController extends AbstractController
             'form' => $form
         ]);
     }
+
+
+    #[Route('/search', name: 'app_search')]
+    public function searchAd(ProductsRepository $productsRepository, Request $request)
+    {
+        dd(json_decode($request->getContent(), true));
+    }
 }
